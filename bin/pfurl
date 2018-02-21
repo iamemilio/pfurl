@@ -77,11 +77,11 @@ parser.add_argument(
     help    = 'REST verb.'
 )
 parser.add_argument(
-    '--http',
+    '--url',
     action  = 'store',
-    dest    = 'http',
-    default = '%s:%s' % (str_defIP, str_defPort),
-    help    = 'HTTP string: <IP>[:<port>]</some/path/>'
+    dest    = 'url',
+    help    = 'The exact address of your server',
+    default = ''
 )
 parser.add_argument(
     '--auth',
@@ -153,17 +153,55 @@ parser.add_argument(
     action  = 'store_true',
     default = False
 )
+parser.add_argument(
+    '--http',
+    help    = 'WARNING: This function is depricated: HTTP string: <IP>[:<port>]</some/path/>',
+    dest    = 'http',
+    action  = 'store',
+    default = ''
+)
+parser.add_argument(
+    '--trusted',
+    help    = 'Identifies the SENDER as trusted and allows them to send self-signed certificates'
+    dest    = 'trusted'
+    action  = 'store'
+    default = False
+)
 
 
-args    = parser.parse_args()
+args   = parser.parse_args()
 
 if args.b_version:
     print("Version: %s" % str_version)
     sys.exit(1)
 
+http_syntax_error = """
+Error: the --http and --url arguments are synonomous. You can only use one or the other
+Use of --http is depricated and will not be supported in future builds!
+Exiting!
+"""
+
+if args.http:
+
+    # Case 1: Client uses both --url and --https        -->     exits with code 1
+    if args.url:
+        print(http_syntax_error)
+        sys.exit(2)
+
+    # Case 2: Client uses only --https                  -->     packages request with new --url syntax
+    else:
+        print("Warning: The use of --http is depricated and wont be supported in future builds!")
+        args.url = 'http://%s' % args.http
+
+# Case 3: Client fails to use either --http or --url    -->     Sets url to default values (this should result in failure in future iterations)
+elif not args.url:
+    args.url = '%s:%s' % (str_defIP, str_defPort)
+    
+
+
 pfurl  = pfurl.Pfurl(
     msg                         = args.msg,
-    http                        = args.http,
+    url                         = args.url,
     verb                        = args.verb,
     contentType                 = args.contentType,
     auth                        = args.auth,
@@ -172,6 +210,7 @@ pfurl  = pfurl.Pfurl(
     b_oneShot                   = args.b_oneShot,
     b_httpResponseBodyParse     = args.b_httpResponseBodyParse,
     jsonwrapper                 = args.jsonwrapper,
+    trusted                     = args.trusted,
     man                         = args.man,
     desc                        = str_desc,
     name                        = str_name,

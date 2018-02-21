@@ -94,15 +94,11 @@ class Pfurl():
                                             within      = self.__name__ 
                                             )
 
-        self.str_http                   = ""
-        self.str_ip                     = ""
-        self.str_port                   = ""
         self.str_URL                    = ""
         self.str_verb                   = ""
         self.str_msg                    = ""
         self.str_auth                   = ""
         self.d_msg                      = {}
-        self.str_protocol               = "http"
         self.pp                         = pprint.PrettyPrinter(indent=4)
         self.b_man                      = False
         self.str_man                    = ''
@@ -121,6 +117,7 @@ class Pfurl():
         self.str_name                   = ''
         self.str_version                = ''
         self.str_desc                   = ''
+        self.trusted                    = False
 
         for key,val in kwargs.items():
             if key == 'msg':
@@ -129,12 +126,10 @@ class Pfurl():
                     self.d_msg              = json.loads(self.str_msg)
                 except:
                     pass
-            if key == 'http':                       self.httpStr_parse( http        = val)
+            if key == 'url' :                       self.str_URL                    = val
             if key == 'auth':                       self.str_auth                   = val
             if key == 'verb':                       self.str_verb                   = val
             if key == 'contentType':                self.str_contentType            = val
-            if key == 'ip':                         self.str_ip                     = val
-            if key == 'port':                       self.str_port                   = val
             if key == 'b_quiet':                    self.b_quiet                    = val
             if key == 'b_raw':                      self.b_raw                      = val
             if key == 'b_oneShot':                  self.b_oneShot                  = val
@@ -147,6 +142,7 @@ class Pfurl():
             if key == 'name':                       self.str_name                   = val
             if key == 'version':                    self.str_version                = val
             if key == 'desc':                       self.str_desc                   = val
+            if key == 'trusted':                    self.trusted                    = val
 
         if self.b_quiet: self.dp.verbosity = -10
 
@@ -160,7 +156,6 @@ class Pfurl():
             sys.exit(0)
 
         if not self.b_quiet:
-
             print(self.str_desc)
 
             if self.b_useDebug:
@@ -175,12 +170,9 @@ class Pfurl():
             self.dp.qprint('pfurl: Start from CLI = %d' % self._startFromCLI)
             self.dp.qprint('pfurl: Command line args = %s' % sys.argv)
             if self._startFromCLI and (sys.argv) == 1: sys.exit(1)
-
-            str_colon_port = ''
-            if self.str_port:
-                str_colon_port = ':' + self.str_port
-
-            self.col2_print("Will transmit to ",     '%s://%s%s' % (self.str_protocol, self.str_ip, str_colon_port))
+            
+            self.qprint(self.str_URL + '\n '+ str(self.d_msg),
+                comms  = 'tx')
 
     def storage_resolveBasedOnKey(self, *args, **kwargs):
         """
@@ -276,17 +268,17 @@ class Pfurl():
             to a remote REST-like service: """ + Colors.GREEN + """
 
                  ./pfurl.py [--auth <username:passwd>] [--verb <GET/POST>]   \\
-                            --http <IP>[:<port>]</some/path/>
+                            --url <IP>[:<port>]</some/path/>
 
             """ + Colors.WHITE + """
             Where --auth is an optional authorization to pass to the REST API,
-            --verb denotes the REST verb to use and --http specifies the REST URL.
+            --verb denotes the REST verb to use and --url specifies the REST URL.
 
             Additionally, a 'message' described in JSON syntax can be pushed to the
             remote service, in the following syntax: """ + Colors.GREEN + """
 
                  pfurl     [--auth <username:passwd>] [--verb <GET/POST>]   \\
-                            --http <IP>[:<port>]</some/path/>               \\
+                            --url <IP>[:<port>]</some/path/>               \\
                            [--msg <JSON-formatted-string>]
 
             """ + Colors.WHITE + """
@@ -294,7 +286,7 @@ class Pfurl():
             contextual syntax, for example:
             """ + Colors.GREEN + """
 
-                 pfurl      --verb POST --http %s:%s/api/v1/cmd/ --msg \\
+                 pfurl      --verb POST --url %s/api/v1/cmd/ --msg \\
                                 '{  "action": "run",
                                     "meta": {
                                         "cmd":      "cal 7 1970",
@@ -305,7 +297,7 @@ class Pfurl():
                                 }'
 
 
-            """ % (self.str_ip, self.str_port) + Colors.CYAN + """
+            """ % (self.str_URL) + Colors.CYAN + """
 
             The following specific action directives are directly handled by script:
             """ + "\n" + \
@@ -365,7 +357,7 @@ class Pfurl():
                 """ + Colors.YELLOW + """EXAMPLE:
                 """ + Colors.LIGHT_GREEN + """
                 
-                pfurl --verb POST --http %s:%s/api/v1/cmd/ --msg \\
+                pfurl --verb POST --url %s/api/v1/cmd/ --msg \\
                     '{  "action": "pushPath",
                         "meta":
                             {
@@ -389,11 +381,11 @@ class Pfurl():
                                     }
                             }
                     }'
-                """ % (self.str_ip, self.str_port) + Colors.NO_COLOUR  + """
+                """ % (self.str_URL) + Colors.NO_COLOUR  + """
                 """ + Colors.YELLOW + """ALTERNATE -- using copy/symlink:
                 """ + Colors.LIGHT_GREEN + """
                 
-                pfurl --verb POST --http %s:%s/api/v1/cmd/ --msg \\
+                pfurl --verb POST --url %s/api/v1/cmd/ --msg \\
                     '{  "action": "pushPath",
                         "meta":
                             {
@@ -414,7 +406,7 @@ class Pfurl():
                                     }
                             }
                     }'
-                """ % (self.str_ip, self.str_port) + Colors.NO_COLOUR
+                """ % (self.str_URL) + Colors.NO_COLOUR
 
         return str_manTxt
 
@@ -458,7 +450,7 @@ class Pfurl():
                 """ + Colors.YELLOW + """EXAMPLE -- using zip:
                 """ + Colors.LIGHT_GREEN + """
                 
-                pfurl --verb POST --http %s:%s/api/v1/cmd/ --msg \\
+                pfurl --verb POST --url %s/api/v1/cmd/ --msg \\
                     '{  "action": "pullPath",
                         "meta":
                             {
@@ -482,11 +474,11 @@ class Pfurl():
                                     }
                             }
                     }'
-                """ % (self.str_ip, self.str_port) + Colors.NO_COLOUR + """
+                """ % (self.str_URL) + Colors.NO_COLOUR + """
                 """ + Colors.YELLOW + """ALTERNATE -- using copy/symlink:
                 """ + Colors.LIGHT_GREEN + """
                 
-                pfurl --verb POST --http %s:%s/api/v1/cmd/ --msg \\
+                pfurl --verb POST --url %s/api/v1/cmd/ --msg \\
                     '{  "action": "pullPath",
                         "meta":
                             {
@@ -507,45 +499,43 @@ class Pfurl():
                                     }
                             }
                     }'
-                """ % (self.str_ip, self.str_port) + Colors.NO_COLOUR
+                """ % (self.str_URL) + Colors.NO_COLOUR
 
         return str_manTxt
 
     def pull_core(self, **kwargs):
         """
         Just the core of the pycurl logic.
+        **kwargs == (msg = d_msg)  --> json wrapped msg 
         """
-
-        str_ip              = self.str_ip
-        str_port            = self.str_port
         verbose             = 0
         d_msg               = {}
 
+        #Allowed kwargs:
+        #   msg         = json message
+        #   verbose     = verbosity keyword (prints all stdout if unset)
         for k,v in kwargs.items():
-            if k == 'ip':       str_ip      = v
-            if k == 'port':     str_port    = v
             if k == 'msg':      d_msg       = v
             if k == 'verbose':  verbose     = v
 
         response            = io.BytesIO()
-
         str_query   = ''
         if len(d_msg):
             d_meta              = d_msg['meta']
             str_query           = '?%s' % urllib.parse.urlencode(d_msg)
+        
+        self.qprint(self.str_URL + '\n '+ str(d_msg),
+            comms  = 'tx')
 
-        str_URL = "http://%s:%s%s%s" % (str_ip, str_port, self.str_URL, str_query)
-
-        self.dp.qprint(str_URL,
-                    comms  = 'tx')
-
-        c                   = pycurl.Curl()
-        c.setopt(c.URL, str_URL)
+        c = pycurl.Curl()
+        c.setopt(c.URL, "%s%s" % (self.str_URL, str_query))
         if verbose: c.setopt(c.VERBOSE, 1)
         c.setopt(c.FOLLOWLOCATION,  1)
         c.setopt(c.WRITEFUNCTION,   response.write)
         if len(self.str_auth):
             c.setopt(c.USERPWD, self.str_auth)
+        if self.trusted:
+            c.setopt(c.SSL_VERIFYPEER, 0) # allow self signed cert
         self.dp.qprint("Waiting for PULL response...", comms = 'status')
         c.perform()
         c.close()
@@ -878,22 +868,24 @@ class Pfurl():
 
     def push_core(self, d_msg, **kwargs):
         """
+            push_core(self, d_msg, **kwargs)
 
+            allowed kwargs:
+                fileToPush  -   string path to file
+                encoding    -   encoding of compressed file
+                d_ret       -   return args
+                verbose     -   whether to print stdout
         """
 
         str_fileToProcess   = ""
         str_encoding        = "none"
         d_ret               = {}
-        str_ip              = self.str_ip
-        str_port            = self.str_port
         verbose             = 0
 
         for k,v in kwargs.items():
             if k == 'fileToPush':   str_fileToProcess   = v
             if k == 'encoding':     str_encoding        = v
             if k == 'd_ret':        d_ret               = v
-            if k == 'ip':           str_ip              = v
-            if k == 'port':         str_port            = v
             if k == 'verbose':      verbose             = v
 
         if len(self.str_jsonwrapper):
@@ -902,18 +894,12 @@ class Pfurl():
             str_msg         = json.dumps(d_msg)
         response            = io.BytesIO()
 
-
-        str_colon_port = ''
-        if str_port:
-            str_colon_port = ':' + str_port
-
-        self.qprint("http://%s%s%s" % (str_ip, str_colon_port, self.str_URL) + '\n '+ str(d_msg),
-                    comms  = 'tx')
+        self.qprint(self.str_URL + '\n '+ str(d_msg),
+            comms  = 'tx')
 
         c = pycurl.Curl()
         c.setopt(c.POST, 1)
-        # c.setopt(c.URL, "http://%s:%s/api/v1/cmd/" % (str_ip, str_port))
-        c.setopt(c.URL, "http://%s:%s%s" % (str_ip, str_port, self.str_URL))
+        c.setopt(c.URL, self.str_URL)
         if str_fileToProcess:
             self.dp.qprint("Building form-based multi-part message...", comms = 'status')
             fread               = open(str_fileToProcess, "rb")
@@ -933,8 +919,8 @@ class Pfurl():
             #          )
             c.setopt(c.POSTFIELDS, str_msg)
         if verbose:                     c.setopt(c.VERBOSE, 1)
-        # print(self.str_contentType)
         if len(self.str_contentType):   c.setopt(c.HTTPHEADER, ['Content-type: %s' % self.str_contentType])
+        if self.trusted:                c.setopt(c.SSL_VERIFYPEER, 0) # allow self signed cert
         c.setopt(c.WRITEFUNCTION,   response.write)
         if len(self.str_auth):
             c.setopt(c.USERPWD, self.str_auth)
@@ -982,6 +968,7 @@ class Pfurl():
 
         return d_ret
 
+    #is this called anywhere? --> no
     def pushPath_core(self, d_msg, **kwargs):
         """
 
@@ -996,21 +983,17 @@ class Pfurl():
             if k == 'd_ret':        d_ret               = v
 
         d_meta              = d_msg['meta']
-        str_ip              = self.str_ip
-        str_port            = self.str_port
+
         if 'remote' in d_meta:
-            d_remote            = d_meta['remote']
-            if 'ip' in d_remote:    str_ip      = d_remote['ip']
-            if 'port' in d_remote:  str_port    = d_remote['port']
+            d_remote        = d_meta['remote']
 
         d_ret               = self.push_core(   d_msg,
                                                 fileToPush  = str_fileToProcess,
-                                                encoding    = str_encoding,
-                                                ip          = str_ip,
-                                                port        = str_port
+                                                encoding    = str_encoding
                                             )
         return d_ret
 
+## !! Attention needed here!
     def pushPath_compress(self, d_msg, **kwargs):
         """
         """
@@ -1021,15 +1004,7 @@ class Pfurl():
         str_meta            = json.dumps(d_meta)
         d_local             = d_meta['local']
         str_localPath       = d_local['path']
-
         d_remote            = d_meta['remote']
-        str_ip              = self.str_ip
-        str_port            = self.str_port
-        if 'ip' in d_remote:
-            str_ip          = d_remote['ip']
-        if 'port' in d_remote:
-            str_port        = d_remote['port']
-
         str_mechanism       = ""
         str_encoding        = ""
         str_archive         = ""
@@ -1283,20 +1258,6 @@ class Pfurl():
 
         return self.pathOp_do(d_msg, action = 'pull')
 
-    def httpStr_parse(self, **kwargs):
-
-        for k,v in kwargs.items():
-            if k == 'http':     self.str_http   = v
-
-        # Split http string into IP:port and URL
-        path_split_url = self.str_http.split('/')
-        str_IPport          = path_split_url[0]
-        self.str_URL        = '/' + '/'.join(path_split_url[1:])
-        host_port_pair = str_IPport.split(':')
-        self.str_ip = host_port_pair[0]
-        if len(host_port_pair) > 1:
-            self.str_port = host_port_pair[1]
-
     def httpResponse_bodyParse(self, **kwargs):
         """
         Returns the *body* from a http response.
@@ -1325,13 +1286,14 @@ class Pfurl():
         :return:
         """
         str_action  = ''
-
         for key,val in kwargs.items():
+            # parses for --msg containing the json payload
             if key == 'msg':
                 self.str_msg    = val
                 self.d_msg      = json.loads(self.str_msg)
-            if key == 'http':       self.httpStr_parse( http    = val)
+            if key == 'url':        self.str_URL                = val
             if key == 'verb':       self.str_verb               = val
+            if key == 'trusted':    self.trusted                = val
 
         if len(self.str_msg):
             if 'action' in self.d_msg: str_action  = self.d_msg['action']
@@ -1345,7 +1307,7 @@ class Pfurl():
             str_stdout      = json.dumps(d_ret)
         else:
             d_ret = self.pull_core()
-            str_stdout  = '%s' % d_ret
+            str_stdout  = 'd_ret:\n%s' % d_ret
 
         if not self.b_quiet: print(Colors.CYAN)
         return str_stdout
