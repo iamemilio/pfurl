@@ -162,9 +162,9 @@ parser.add_argument(
 )
 parser.add_argument(
     '--trusted',
-    help    = 'Identifies the SENDER as trusted and allows them to send self-signed certificates'
-    dest    = 'trusted'
-    action  = 'store'
+    help    = 'Identifies the SENDER as trusted and allows them to send self-signed certificates',
+    dest    = 'trusted',
+    action  = 'store',
     default = False
 )
 
