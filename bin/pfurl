@@ -161,7 +161,11 @@ parser.add_argument(
     help   = 'any web address'
 )
 parser.add_argument(
+<<<<<<< HEAD
     '--insecure',
+=======
+    '--trusted',
+>>>>>>> f792eec02dcb03db36453f8bdb0194ff682a0bf5
     action = 'store_true',
     dest   = 'trusted',
     default= False,
@@ -204,7 +208,7 @@ pfurl  = pfurl.Pfurl(
     version                     = str_version,
     startFromCLI                = True,
     insecure                    = args.insecure
-    )
+)
 
 if not args.jsonpprintindent:
     print(pfurl())

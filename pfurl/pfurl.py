@@ -541,6 +541,7 @@ class Pfurl():
         if verbose: c.setopt(c.VERBOSE, 1)
         c.setopt(c.FOLLOWLOCATION,  1)
         c.setopt(c.WRITEFUNCTION,   response.write)
+        
         if self.insecure:
             print("Attempting an insecure connection with trusted host")
             c.setopt(pycurl.SSL_VERIFYPEER, 0)   
