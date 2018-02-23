@@ -160,8 +160,15 @@ parser.add_argument(
     default= '',
     help   = 'any web address'
 )
+parser.add_argument(
+    '--trusted',
+    action = 'store_true',
+    dest   = 'trusted',
+    default= False,
+    help   = 'Indicates that the this message is from a trusted source, enabling https servers to accept self signed certificates'
+)
  
-args    = parser.parse_args()
+args = parser.parse_args()
 
 if args.http:
     # if the user enters --http and --url
@@ -195,7 +202,8 @@ pfurl  = pfurl.Pfurl(
     desc                        = str_desc,
     name                        = str_name,
     version                     = str_version,
-    startFromCLI                = True
+    startFromCLI                = True,
+    trusted                     = args.trusted
     )
 
 if not args.jsonpprintindent:

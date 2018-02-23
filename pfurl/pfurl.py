@@ -111,6 +111,7 @@ class Pfurl():
         self.str_contentType            = ''
         self.b_useDebug                 = False
         self.str_debugFile              = ''
+        self.trusted                    = False
 
 
         #for deprecated projects --> this should be removed in future iterations
@@ -146,6 +147,7 @@ class Pfurl():
             if key == 'name':                       self.str_name                   = val
             if key == 'version':                    self.str_version                = val
             if key == 'desc':                       self.str_desc                   = val
+            if key == 'trusted':                    self.trusted                    = val
 
         if self.b_quiet: self.dp.verbosity = -10
 
@@ -539,6 +541,11 @@ class Pfurl():
         if verbose: c.setopt(c.VERBOSE, 1)
         c.setopt(c.FOLLOWLOCATION,  1)
         c.setopt(c.WRITEFUNCTION,   response.write)
+        if self.trusted:
+            print("Attempting an insecure connection with trusted host")
+            c.setopt(pycurl.SSL_VERIFYPEER, 0)   
+            c.setopt(pycurl.SSL_VERIFYHOST, 0)
+
         if len(self.str_auth):
             c.setopt(c.USERPWD, self.str_auth)
         self.dp.qprint("Waiting for PULL response...", comms = 'status')
@@ -899,6 +906,10 @@ class Pfurl():
         c = pycurl.Curl()
         c.setopt(c.POST, 1)
         c.setopt(c.URL, self.url)
+        if self.trusted:
+            print("Attempting an insecure connection with trusted host")
+            c.setopt(pycurl.SSL_VERIFYPEER, 0)   
+            c.setopt(pycurl.SSL_VERIFYHOST, 0)
         if str_fileToProcess:
             self.dp.qprint("Building form-based multi-part message...", comms = 'status')
             fread               = open(str_fileToProcess, "rb")
@@ -1288,8 +1299,9 @@ class Pfurl():
             if key == 'msg':
                 self.str_msg    = val
                 self.d_msg      = json.loads(self.str_msg)
-            if key == 'url':        self.url    = val
+            if key == 'url':        self.url        = val
             if key == 'verb':       self.str_verb   = val
+            if key == 'trusted':    self.trusted    = val
 
         if len(self.str_msg):
             if 'action' in self.d_msg: str_action  = self.d_msg['action']
