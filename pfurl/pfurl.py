@@ -147,7 +147,7 @@ class Pfurl():
             if key == 'name':                       self.str_name                   = val
             if key == 'version':                    self.str_version                = val
             if key == 'desc':                       self.str_desc                   = val
-            if key == 'insecure':                    self.insecure                    = val
+            if key == 'insecure':                   self.insecure                   = val
 
         if self.b_quiet: self.dp.verbosity = -10
 
@@ -1301,7 +1301,7 @@ class Pfurl():
                 self.d_msg      = json.loads(self.str_msg)
             if key == 'url':        self.url        = val
             if key == 'verb':       self.str_verb   = val
-            if key == 'trusted':    self.insecure    = val
+            if key == 'insecure':   self.insecure   = val
 
         if len(self.str_msg):
             if 'action' in self.d_msg: str_action  = self.d_msg['action']
