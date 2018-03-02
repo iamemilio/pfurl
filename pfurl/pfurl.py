@@ -1290,7 +1290,6 @@ class Pfurl():
     def __call__(self, *args, **kwargs):
         """
         Main entry point for "calling".
-
         :param self:
         :param kwargs:
         :return:
@@ -1301,9 +1300,24 @@ class Pfurl():
             if key == 'msg':
                 self.str_msg    = val
                 self.d_msg      = json.loads(self.str_msg)
-            if key == 'url':               self.url               = val
+            if key == 'url':               self.url               = val               
             if key == 'verb':              self.str_verb          = val
             if key == 'b_unverifiedCerts': self.b_unverifiedCerts = val
+            if key == 'http':              self.http              = val
+        
+        if self.http:
+            if self.url:
+                self.dp.qprint("pfurl: Error: You may only specify either url or http, not both! Exiting")
+                sys.exit(2)
+            else:
+                self.dp.qprint("Warning: The use of http is deprecated and will be removed in future iterations")
+                if 'http://' not in self.http:
+                    self.url = 'http://%s' % self.http
+                else:
+                    self.url = self.http
+        elif not self.url:
+            self.dp.qprint("pfurl: Error: No web address provided! Exiting!")
+            sys.exit(2)
 
         if len(self.str_msg):
             if 'action' in self.d_msg: str_action  = self.d_msg['action']
