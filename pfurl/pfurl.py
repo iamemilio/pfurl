@@ -157,7 +157,7 @@ class Pfurl():
                 sys.exit(2)
             else:
                 self.dp.qprint("Warning: The use of http is deprecated and will be removed in future iterations")
-                if 'http://' not in self.http:
+                if 'http://' or 'https://' not in self.http:
                     self.url = 'http://%s' % self.http
                 else:
                     self.url = self.http
@@ -1305,19 +1305,16 @@ class Pfurl():
             if key == 'b_unverifiedCerts': self.b_unverifiedCerts = val
             if key == 'http':              self.http              = val
         
-        if self.http:
-            if self.url:
-                self.dp.qprint("pfurl: Error: You may only specify either url or http, not both! Exiting")
-                sys.exit(2)
+        # In order to accommodate http and url, I had to make the following trade off:
+        # If both http and url are provided, we will always choose the url
+        # if http is chosen, it will be converted to the url syntax
+        # if only url is provided, then we will use the url syntax
+        # the http syntax is deprecated and may not be supported in the future
+        if self.http and not self.url:
+            if 'http://' or 'https://' not in self.http:
+                self.url = 'http://%s' % self.http
             else:
-                self.dp.qprint("Warning: The use of http is deprecated and will be removed in future iterations")
-                if 'http://' not in self.http:
-                    self.url = 'http://%s' % self.http
-                else:
-                    self.url = self.http
-        elif not self.url:
-            self.dp.qprint("pfurl: Error: No web address provided! Exiting!")
-            sys.exit(2)
+                self.url = self.http
 
         if len(self.str_msg):
             if 'action' in self.d_msg: str_action  = self.d_msg['action']
