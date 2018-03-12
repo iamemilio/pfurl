@@ -150,20 +150,16 @@ class Pfurl():
 
         if self.b_quiet: self.dp.verbosity = -10
 
-        #allows deprecated programs to use the syntax and checks for certian corner cases where pfurl may fail or work unpredictably
-        if self.http:
-            if self.url:
-                self.dp.qprint("pfurl: Error: You may only specify either url or http, not both! Exiting")
-                sys.exit(2)
+        # In order to accommodate http and url, I had to make the following trade off:
+        # If both http and url are provided, we will always choose the url
+        # if http is chosen, it will be converted to the url syntax
+        # if only url is provided, then we will use the url syntax
+        # the http syntax is deprecated and may not be supported in the future
+        if self.http and not self.url:
+            if 'http://' or 'https://' not in self.http:
+                self.url = 'http://%s' % self.http
             else:
-                self.dp.qprint("Warning: The use of http is deprecated and will be removed in future iterations")
-                if 'http://' or 'https://' not in self.http:
-                    self.url = 'http://%s' % self.http
-                else:
-                    self.url = self.http
-        elif not self.url:
-            self.dp.qprint("pfurl: Error: No web address provided! Exiting!")
-            sys.exit(2)
+                self.url = self.http
 
         if self.b_useDebug:
             self.debug                  = Message(logTo = self.str_debugFile)
