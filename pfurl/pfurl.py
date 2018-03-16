@@ -539,14 +539,13 @@ class Pfurl():
         
         print("query: ", str_query)
         url = '%s%s' % (url, str_query)
-        print("full url: ", url)
         
         self.dp.qprint(url,
                     comms  = 'tx')
 
         c = pycurl.Curl()
         c.setopt(c.URL, url)
-        print('\n\nsending to: %s\n\n' % self.url)
+        print('\n\nsending to: %s\n\n' % url)
         if verbose: c.setopt(c.VERBOSE, 1)
         c.setopt(c.FOLLOWLOCATION,  1)
         c.setopt(c.WRITEFUNCTION,   response.write)
@@ -913,13 +912,13 @@ class Pfurl():
             str_msg         = json.dumps(d_msg)
         response            = io.BytesIO()
 
-        self.qprint(self.url + '\n '+ str(d_msg),
+        self.qprint(url + '\n '+ str(d_msg),
                     comms  = 'tx')
 
         c = pycurl.Curl()
         c.setopt(c.POST, 1)
         c.setopt(c.URL, url)
-        print("\n\nsending to: %s\n\n" % self.url)
+        print("\n\nsending to: %s\n\n" % url)
         if self.b_unverifiedCerts:
             self.dp.qprint("Attempting an insecure connection with trusted host")
             c.setopt(pycurl.SSL_VERIFYPEER, 0)   
@@ -1322,6 +1321,7 @@ class Pfurl():
             if key == 'b_unverifiedCerts': self.b_unverifiedCerts = val
             if key == 'http':              self.http              = val
         
+        pudb.set_trace()
         
         # In order to accommodate http and url, I had to make the following trade off:
         # If both http and url are provided, we will always choose the url
