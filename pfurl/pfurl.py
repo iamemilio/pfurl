@@ -545,9 +545,9 @@ class Pfurl():
     
         response            = io.BytesIO()
         str_query   = ''
-	    if len(d_msg):
-	        d_meta              = d_msg['meta']
-	        str_query           = '?%s' % urllib.parse.urlencode(d_msg)
+        if len(d_msg):
+            d_meta              = d_msg['meta']
+            str_query           = '?%s' % urllib.parse.urlencode(d_msg)
         
         print("query: ", str_query)
         url = '%s%s' % (url, str_query)
