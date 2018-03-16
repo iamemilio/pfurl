@@ -525,7 +525,6 @@ class Pfurl():
         d_msg               = {}
         url                 = self.url
 
-        whatAreTheParams('pull_core', kwargs.items())
         for k,v in kwargs.items():
             if k == 'msg':      d_msg       = v
             if k == 'verbose':  verbose     = v
@@ -899,7 +898,6 @@ class Pfurl():
         verbose             = 0
         url                 = self.url
 
-        whatAreTheParams('push_core', kwargs.items())
         for k,v in kwargs.items():
             if k == 'fileToPush':   str_fileToProcess   = v
             if k == 'encoding':     str_encoding        = v
@@ -919,7 +917,7 @@ class Pfurl():
 
         c = pycurl.Curl()
         c.setopt(c.POST, 1)
-        c.setopt(c.URL, self.url)
+        c.setopt(c.URL, url)
         print("\n\nsending to: %s\n\n" % self.url)
         if self.b_unverifiedCerts:
             self.dp.qprint("Attempting an insecure connection with trusted host")
@@ -1001,8 +999,6 @@ class Pfurl():
         str_encoding        = "none"
         d_ret               = {}
         url                 = self.url
-
-        whatAreTheParams('pushPath_core', kwargs.items())
 
         for k,v in kwargs.items():
             if k == 'fileToPush':   str_fileToProcess   = v
@@ -1491,14 +1487,3 @@ def base64_process(**kwargs):
             'status':           True
             # 'decodedBytes':     bytes_decoded
         }
-
-def whatAreTheParams(place, kwargs):
-    """
-    Kwargs is annoying ---> home brew debugging
-    place = string name of function you are in or any identifier you want to give it
-    kwargs= that function's kwargs lol
-    """
-    print("\n==============================================\nKwargs Keys and Values in %s" % place)
-    for k,v in kwargs:
-        print('%s\t:\t%s' % (k,v))
-        print('==============================================\n')
