@@ -51,7 +51,7 @@ class Pfurl():
         else:
             write   = print
 
-        # pudb.set_trace()
+        # 
 
         str_caller  = inspect.stack()[1][3]
 
@@ -213,7 +213,7 @@ class Pfurl():
             if k == 'key':  str_key = v
         d_msg['meta']['key']    = str_key
 
-        # pudb.set_trace()
+        # 
         d_ret = self.pullPath_core(d_msg = d_msg)
 
         return {
@@ -516,6 +516,17 @@ class Pfurl():
                 """ % (self.url) + Colors.NO_COLOUR
 
         return str_manTxt
+    
+    def whatAreTheParams(self, place, **kwargs):
+        """
+        Kwargs is annoying ---> home brew debugging
+        place = string name of function you are in or any identifier you want to give it
+        kwargs= that function's kwargs lol
+        """
+        print("\n==============================================\nKwargs Keys and Values in %s" % place)
+        for k,v in kwargs.items:
+            print('%s\t:\t%s' % (k,v))
+            print('==============================================\n')
 
     def pull_core(self, **kwargs):
         """
@@ -523,19 +534,31 @@ class Pfurl():
         """
         verbose             = 0
         d_msg               = {}
+        url                 = self.url
 
+        whatAreTheParams('pull_core', kwargs)
         for k,v in kwargs.items():
             if k == 'msg':      d_msg       = v
             if k == 'verbose':  verbose     = v
-
+            if k == 'url':      url         = v
+            
+    
         response            = io.BytesIO()
+        str_query   = ''
+	        if len(d_msg):
+	            d_meta              = d_msg['meta']
+	            str_query           = '?%s' % urllib.parse.urlencode(d_msg)
+        
+        print("query: ", str_query)
 
-        self.dp.qprint(self.url,
+        url = '%s%s' % (url, str_query)
+        
+        self.dp.qprint(url,
                     comms  = 'tx')
 
         c = pycurl.Curl()
-        c.setopt(c.URL, self.url)
-        print('\n\nsending to: %s' % self.url)
+        c.setopt(c.URL, url)
+        print('\n\nsending to: %s\n\n' % self.url)
         if verbose: c.setopt(c.VERBOSE, 1)
         c.setopt(c.FOLLOWLOCATION,  1)
         c.setopt(c.WRITEFUNCTION,   response.write)
@@ -669,7 +692,7 @@ class Pfurl():
         str_response            = d_pull['response']
         d_pull['response']      = '<truncated>'
 
-        # pudb.set_trace()
+        # 
         if not d_pull['status']:
             if 'stdout' in d_pull:
                 return {'stdout': json.dumps(d_pull['stdout'])}
@@ -886,13 +909,17 @@ class Pfurl():
         str_encoding        = "none"
         d_ret               = {}
         verbose             = 0
+        url                 = self.url
 
+        whatAreTheParams('push_core', kwargs)
         for k,v in kwargs.items():
             if k == 'fileToPush':   str_fileToProcess   = v
             if k == 'encoding':     str_encoding        = v
             if k == 'd_ret':        d_ret               = v
             if k == 'verbose':      verbose             = v
+            if k == 'url':          url                 = v 
 
+        
         if len(self.str_jsonwrapper):
             str_msg         = json.dumps({self.str_jsonwrapper: d_msg})
         else:
@@ -905,7 +932,7 @@ class Pfurl():
         c = pycurl.Curl()
         c.setopt(c.POST, 1)
         c.setopt(c.URL, self.url)
-        print("\n\nsending to: %s" % self.url)
+        print("\n\nsending to: %s\n\n" % self.url)
         if self.b_unverifiedCerts:
             self.dp.qprint("Attempting an insecure connection with trusted host")
             c.setopt(pycurl.SSL_VERIFYPEER, 0)   
@@ -985,26 +1012,31 @@ class Pfurl():
         str_fileToProcess   = ""
         str_encoding        = "none"
         d_ret               = {}
+        url                 = self.url
+
+        whatAreTheParams('pushPath_core', kwargs)
+
         for k,v in kwargs.items():
             if k == 'fileToPush':   str_fileToProcess   = v
             if k == 'encoding':     str_encoding        = v
             if k == 'd_ret':        d_ret               = v
+            if k == 'url':          url                 = v
 
         d_meta              = d_msg['meta']
         if 'remote' in d_meta:
             d_remote            = d_meta['remote']
-            
+            if 'url' in d_remote: 
+                url = d_remote['url']
+                print('remote url: ', url)
+
         d_ret               = self.push_core(   d_msg,
                                                 fileToPush  = str_fileToProcess,
-                                                encoding    = str_encoding
+                                                encoding    = str_encoding,
+                                                url = url
                                             )
         return d_ret
 
     def pushPath_compress(self, d_msg, **kwargs):
-        """
-        """
-
-        # pudb.set_trace()
 
         d_meta              = d_msg['meta']
         str_meta            = json.dumps(d_meta)
@@ -1021,9 +1053,11 @@ class Pfurl():
             str_archive     = d_compress['archive']
             str_encoding    = d_compress['encoding']
 
-        # pudb.set_trace()
-        str_remotePath      = self.remoteLocation_resolveSimple(d_remote)['path']
+        url                 = self.url
+        if 'url' in d_remote: 
+            url = d_remote['url']
 
+        str_remotePath      = self.remoteLocation_resolveSimple(d_remote)['path']
         if 'cleanup' in d_compress:
             b_cleanZip      = d_compress['cleanup']
 
@@ -1160,7 +1194,7 @@ class Pfurl():
         else:
             d_transport = d_meta['transport']
 
-        # pudb.set_trace()
+        # 
         # First check on the paths, both local and remote
         self.dp.qprint('Checking local path status...', comms = 'status')
         d_ret['localCheck'] = self.path_localLocationCheck(d_msg)
@@ -1303,7 +1337,7 @@ class Pfurl():
             if key == 'b_unverifiedCerts': self.b_unverifiedCerts = val
             if key == 'http':              self.http              = val
         
-        pudb.set_trace()
+        
         # In order to accommodate http and url, I had to make the following trade off:
         # If both http and url are provided, we will always choose the url
         # if http is chosen, it will be converted to the url syntax
