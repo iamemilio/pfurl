@@ -535,6 +535,7 @@ class Pfurl():
 
         c = pycurl.Curl()
         c.setopt(c.URL, self.url)
+        print('\n\nsending to: %s' % self.url)
         if verbose: c.setopt(c.VERBOSE, 1)
         c.setopt(c.FOLLOWLOCATION,  1)
         c.setopt(c.WRITEFUNCTION,   response.write)
@@ -904,6 +905,7 @@ class Pfurl():
         c = pycurl.Curl()
         c.setopt(c.POST, 1)
         c.setopt(c.URL, self.url)
+        print("\n\nsending to: %s" % self.url)
         if self.b_unverifiedCerts:
             self.dp.qprint("Attempting an insecure connection with trusted host")
             c.setopt(pycurl.SSL_VERIFYPEER, 0)   
@@ -1301,6 +1303,7 @@ class Pfurl():
             if key == 'b_unverifiedCerts': self.b_unverifiedCerts = val
             if key == 'http':              self.http              = val
         
+        pudb.set_trace()
         # In order to accommodate http and url, I had to make the following trade off:
         # If both http and url are provided, we will always choose the url
         # if http is chosen, it will be converted to the url syntax
@@ -1311,6 +1314,7 @@ class Pfurl():
                 self.url = 'http://%s' % self.http
             else:
                 self.url = self.http
+        
 
         if len(self.str_msg):
             if 'action' in self.d_msg: str_action  = self.d_msg['action']
