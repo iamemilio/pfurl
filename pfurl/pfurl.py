@@ -539,6 +539,7 @@ class Pfurl():
         
         print("query: ", str_query)
         url = '%s%s' % (url, str_query)
+        print("full url: ", url)
         
         self.dp.qprint(url,
                     comms  = 'tx')
