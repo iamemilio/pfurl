@@ -516,17 +516,6 @@ class Pfurl():
                 """ % (self.url) + Colors.NO_COLOUR
 
         return str_manTxt
-    
-    def whatAreTheParams(self, place, **kwargs):
-        """
-        Kwargs is annoying ---> home brew debugging
-        place = string name of function you are in or any identifier you want to give it
-        kwargs= that function's kwargs lol
-        """
-        print("\n==============================================\nKwargs Keys and Values in %s" % place)
-        for k,v in kwargs.items:
-            print('%s\t:\t%s' % (k,v))
-            print('==============================================\n')
 
     def pull_core(self, **kwargs):
         """
@@ -536,7 +525,7 @@ class Pfurl():
         d_msg               = {}
         url                 = self.url
 
-        whatAreTheParams('pull_core', kwargs)
+        whatAreTheParams('pull_core', kwargs.items())
         for k,v in kwargs.items():
             if k == 'msg':      d_msg       = v
             if k == 'verbose':  verbose     = v
@@ -910,7 +899,7 @@ class Pfurl():
         verbose             = 0
         url                 = self.url
 
-        whatAreTheParams('push_core', kwargs)
+        whatAreTheParams('push_core', kwargs.items())
         for k,v in kwargs.items():
             if k == 'fileToPush':   str_fileToProcess   = v
             if k == 'encoding':     str_encoding        = v
@@ -1013,7 +1002,7 @@ class Pfurl():
         d_ret               = {}
         url                 = self.url
 
-        whatAreTheParams('pushPath_core', kwargs)
+        whatAreTheParams('pushPath_core', kwargs.items())
 
         for k,v in kwargs.items():
             if k == 'fileToPush':   str_fileToProcess   = v
@@ -1502,3 +1491,14 @@ def base64_process(**kwargs):
             'status':           True
             # 'decodedBytes':     bytes_decoded
         }
+
+def whatAreTheParams(place, kwargs):
+    """
+    Kwargs is annoying ---> home brew debugging
+    place = string name of function you are in or any identifier you want to give it
+    kwargs= that function's kwargs lol
+    """
+    print("\n==============================================\nKwargs Keys and Values in %s" % place)
+    for k,v in kwargs:
+        print('%s\t:\t%s' % (k,v))
+        print('==============================================\n')
